@@ -3,18 +3,20 @@ import os
 import sys
 import time
 from pathlib import Path
+import pip
+import numpy as np
 
 import librosa
-import numpy as np
 import soundfile
 from tqdm import tqdm
 
+
 try:
     import onnxruntime as ort
-except ImportError:
-    raise RuntimeError("The package 'onnxruntime' is missing. You can run 'pip install onnxruntime' or check "
-                       "https://onnxruntime.ai/getting-started for more installation options.")
-
+except ModuleNotFoundError:
+    pip.main(['install', "onnxruntime"])
+    import onnxruntime as ort
+    
 base = Path(os.path.dirname(__file__))
 onnx_dir = base / "data/onnx"
 onnx_filenames = filter(lambda filename: filename.endswith(".onnx"), os.listdir(onnx_dir), )
