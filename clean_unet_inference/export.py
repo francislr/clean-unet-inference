@@ -10,10 +10,20 @@ parser = argparse.ArgumentParser(prog='ExportCleanUNetONNX', description='Export
 parser.add_argument('config', help="Model configuration file", type=argparse.FileType('r'))
 parser.add_argument('checkpoint', help="Model checkpoint filename")
 parser.add_argument('onnx', help="ONNX exported filename")
+parser.add_argument('device', default='cpu', choices=['cpu','gpu'], help="choose target device")
 
 args = parser.parse_args()
 
-checkpoint = torch.load(args.checkpoint, map_location='cpu')
+
+if args.device = 'gpu' and torch.cuda.is_available():
+    device = 'cuda'
+else:
+    if not torch.cuda.is_available()
+        print('WARN: CUDA backend in not avilable. Device set to CPU')
+    device = 'cpu'
+
+
+checkpoint = torch.load(args.checkpoint, map_location=device)
 config = json.load(args.config)
 
 net = CleanUNet(**config["network_config"])
@@ -23,8 +33,8 @@ net.eval()
 dummy_data = torch.zeros((1, 1000))
 
 torch.onnx.export(
-    model=net,
-    args=dummy_data,
+    model=net.to(device),
+    args=dummy_data.to(device),
     f=args.onnx,
     do_constant_folding=True,
     export_params=True,
